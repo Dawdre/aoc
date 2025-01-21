@@ -65,30 +65,44 @@ func DayThree() {
 	prio_score_two := 0
 
 	for i := 0; i < len(rucksacks); i += 3 {
-		seen := make(map[rune]int)
 		end := i + 3
 
 		if end > len(rucksacks) {
 			end = len(rucksacks)
 		}
 
-		elf_group := rucksacks[i:end]
+		sack_group := rucksacks[i:end]
+		// create first and primary map
+		common := make(map[rune]bool)
 
-		elf_group_comb := strings.Join(elf_group, "")
-
-		for _, item := range elf_group_comb {
-			seen[item]++
+		for _, sack := range sack_group[0] {
+			// mark the first letters in the first string
+			common[sack] = true
 		}
 
-		for item := range seen {
-			if seen[item] == 1 {
-				prio_score_two += AlphabetScore(string(item))
+		for _, sack := range sack_group[1:] {
+			// create second and comparison map
+			current := make(map[rune]bool)
+
+			for _, item := range sack {
+				current[item] = true
 			}
+
+			for item := range common {
+				// if each common letter does not exist in the current string
+				// delete letter from the common map
+				if !current[item] {
+					delete(common, item)
+				}
+			}
+		}
+
+		for item := range common {
+			prio_score_two += AlphabetScore(string(item))
 		}
 	}
 
 	fmt.Printf("Priority Total Elf Group: %d\n", prio_score_two)
-
 }
 
 func AlphabetScore(letter string) int {
@@ -97,9 +111,9 @@ func AlphabetScore(letter string) int {
 	alphabet_upper := strings.ToUpper(alphabet)
 
 	if strings.Contains(alphabet, letter) {
-		score += strings.Index(alphabet, letter)
+		score += strings.Index(alphabet, letter) + 1
 	} else {
-		score += strings.Index(alphabet_upper, letter)
+		score += strings.Index(alphabet_upper, letter) + 27
 	}
 
 	return score
